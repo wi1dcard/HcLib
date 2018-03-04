@@ -64,9 +64,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HcUtils.cs" />
-    <Compile Include="HcHttp.cs" />
+    <Compile Include="Callback.cs" />
+    <Compile Include="Cookies.cs" />
+    <Compile Include="Utils.cs" />
+    <Compile Include="HttpClient.cs" />
+    <Compile Include="Headers.cs" />
+    <Compile Include="Kernel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RequestBody.cs" />
+    <Compile Include="Response.cs" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="MSScriptControl">
