@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HcHttp", "HcHttp\HcHttp.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestExample", "TestExample\TestExample.csproj", "{24CDA1C2-27CF-4C6F-BE9C-DB2D6F396E31}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HcToolkit", "HcToolkit\HcToolkit.csproj", "{A7CFAE32-7EFE-46DA-B625-A2F73E131CFB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,14 @@ Global
 		{24CDA1C2-27CF-4C6F-BE9C-DB2D6F396E31}.Release|Any CPU.Build.0 = Release|Any CPU
 		{24CDA1C2-27CF-4C6F-BE9C-DB2D6F396E31}.Release|x86.ActiveCfg = Release|Any CPU
 		{24CDA1C2-27CF-4C6F-BE9C-DB2D6F396E31}.Release|x86.Build.0 = Release|Any CPU
+		{A7CFAE32-7EFE-46DA-B625-A2F73E131CFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7CFAE32-7EFE-46DA-B625-A2F73E131CFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7CFAE32-7EFE-46DA-B625-A2F73E131CFB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A7CFAE32-7EFE-46DA-B625-A2F73E131CFB}.Debug|x86.Build.0 = Debug|Any CPU
+		{A7CFAE32-7EFE-46DA-B625-A2F73E131CFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7CFAE32-7EFE-46DA-B625-A2F73E131CFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7CFAE32-7EFE-46DA-B625-A2F73E131CFB}.Release|x86.ActiveCfg = Release|Any CPU
+		{A7CFAE32-7EFE-46DA-B625-A2F73E131CFB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

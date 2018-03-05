@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Net;
 using System.Net.Cache;
-using System.IO;
-using System.Text.RegularExpressions;
 
 namespace HcHttp
 {
@@ -18,65 +14,99 @@ namespace HcHttp
 
 	public class Request
 	{
-		public Method Method = Method.GET;
+		public Request()
+		{
+			this.Method = Method.GET;
+			this.BaseUri = "";
+			this.Uri = "";
+			this.AutoRedirect = true;
+			this.Timeout = int.MaxValue;
+			this.CacheLevel = RequestCacheLevel.NoCacheNoStore;
+			this.SetAllowUnsafeHeaderParsing(true);
+		}
 
-		public string BaseUri = "";
+		public Method Method { get; set; }
 
-		public string Uri = "";
+		public string BaseUri { get; set; }
 
-		public Headers Headers;
+		public string Uri { get; set; }
 
-		public Cookies Cookies;
+		public Headers Headers { get; set; }
 
-		public RequestBody.IBody Content;
+		public Cookies Cookies { get; set; }
 
-		public Callbacks Callbacks;
+		public RequestBody.IBody Content { get; set; }
 
-		public bool AutoRedirect = true;
+		public Callbacks Callbacks { get; set; }
 
-		public int Timeout = int.MaxValue;
+		public bool AutoRedirect { get; set; }
 
-		public RequestCacheLevel CacheLevel = RequestCacheLevel.NoCacheNoStore;
-	}
+		public int Timeout { get; set; }
 
-	public static class Kernel
-	{
-		/// <summary>
-		/// 发起请求
-		/// </summary>
-		public static Response Request(Request Rqt)
+		public RequestCacheLevel CacheLevel { get; set; }
+
+		private bool SetAllowUnsafeHeaderParsing(bool useUnsafe)
+		{
+			//Get the assembly that contains the internal class
+			System.Reflection.Assembly aNetAssembly = System.Reflection.Assembly.GetAssembly(typeof(System.Net.Configuration.SettingsSection));
+			if (aNetAssembly != null)
+			{
+				//Use the assembly in order to get the internal type for the internal class
+				Type aSettingsType = aNetAssembly.GetType("System.Net.Configuration.SettingsSectionInternal");
+				if (aSettingsType != null)
+				{
+					//Use the internal static property to get an instance of the internal settings class.
+					//If the static instance isn't created allready the property will create it for us.
+					object anInstance = aSettingsType.InvokeMember("Section",
+					  System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.GetProperty | System.Reflection.BindingFlags.NonPublic, null, null, new object[] { });
+
+					if (anInstance != null)
+					{
+						//Locate the private bool field that tells the framework is unsafe header parsing should be allowed or not
+						System.Reflection.FieldInfo aUseUnsafeHeaderParsing = aSettingsType.GetField("useUnsafeHeaderParsing", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+						if (aUseUnsafeHeaderParsing != null)
+						{
+							aUseUnsafeHeaderParsing.SetValue(anInstance, useUnsafe);
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+
+		public virtual Response Send()
 		{
 			//基本设置
-			Kernel.SetAllowUnsafeHeaderParsing(true);
-			var Uri = Rqt.Uri;
+			var Uri = this.Uri;
 			if (!(new Uri(Uri, UriKind.RelativeOrAbsolute).IsAbsoluteUri))
 			{
-				Uri = (string.IsNullOrWhiteSpace(Rqt.BaseUri) ? "" : Rqt.BaseUri) + Uri;
+				Uri = (string.IsNullOrWhiteSpace(this.BaseUri) ? "" : this.BaseUri) + Uri;
 			}
-			if (Rqt.Method == Method.GET && Rqt.Content != null && Rqt.Content is RequestBody.FormUrlEncoded)
+			if (this.Method != Method.POST && this.Content != null && this.Content is RequestBody.FormUrlEncoded)
 			{
-				Uri += "?" + Rqt.Content.ToString();
+				Uri += "?" + this.Content.ToString();
 			}
 			HttpWebRequest Request = (HttpWebRequest)HttpWebRequest.Create(Uri);
-			var Callbacks = Rqt.Callbacks ?? new Callbacks();
+			var Callbacks = this.Callbacks ?? new Callbacks();
 
 			byte[] RequestBody = { };
-			switch (Rqt.Method)
+			switch (this.Method)
 			{
 				case Method.GET:
 					Request.Method = "GET";
 					break;
 				case Method.POST:
 					Request.Method = "POST";
-					if (Rqt.Content == null)
+					if (this.Content == null)
 					{
 						throw new System.ArgumentException("Content Could Not Be NULL");
 					}
 					else
 					{
-						RequestBody				= Rqt.Content.Raw;
-						Request.ContentType		= Rqt.Content.ContentType;
-						Request.ContentLength	= Rqt.Content.ContentLength;
+						RequestBody = this.Content.Raw;
+						Request.ContentType = this.Content.ContentType;
+						Request.ContentLength = this.Content.ContentLength;
 					}
 					break;
 				case Method.HEAD:
@@ -87,13 +117,13 @@ namespace HcHttp
 			}
 
 			//参数设置
-			Request.AllowAutoRedirect = Rqt.AutoRedirect;
-			//Request.ReadWriteTimeout = (int)Rqt.Timeout;
-			Request.Timeout = (int)Rqt.Timeout;
+			Request.AllowAutoRedirect = this.AutoRedirect;
+			//Request.ReadWriteTimeout = (int)this.Timeout;
+			Request.Timeout = (int)this.Timeout;
 
 			//通用设置
 			Request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip | DecompressionMethods.None;
-			Request.CachePolicy = new RequestCachePolicy(Rqt.CacheLevel);
+			Request.CachePolicy = new RequestCachePolicy(this.CacheLevel);
 			Request.KeepAlive = true;
 			Request.Accept = "*/*";
 
@@ -101,10 +131,10 @@ namespace HcHttp
 			var RemoveHeaders = new string[] { "Referer", "User-Agent", "Accept", "Keep-Alive", "Connection", "Content-Length", "Content-Type", "Host", "If-Modified-Since" };
 			foreach (var HeaderName in RemoveHeaders)
 			{
-				if (Rqt.Headers != null && !string.IsNullOrEmpty(Rqt.Headers.Get(HeaderName)))
+				if (this.Headers != null && !string.IsNullOrEmpty(this.Headers.Get(HeaderName)))
 				{
 					var HeaderNameWithoutHyphens = HeaderName.Replace("-", "");
-					var HeaderValue = Rqt.Headers[HeaderName];
+					var HeaderValue = this.Headers[HeaderName];
 					var TargetType = Request.GetType().GetProperty(HeaderNameWithoutHyphens).PropertyType;
 					object HeaderValueAsObject = null;
 					switch (TargetType.Name)
@@ -122,12 +152,12 @@ namespace HcHttp
 
 					}
 					Request.GetType().GetProperty(HeaderNameWithoutHyphens).SetValue(Request, HeaderValueAsObject, null);
-					Rqt.Headers.Remove(HeaderName);
+					this.Headers.Remove(HeaderName);
 				}
 			}
 
 			//请求头
-			var RequestHeaders = Rqt.Headers == null ? (Rqt.Cookies == null ? new Headers() : new Headers(Rqt.Cookies)) : Rqt.Headers;
+			var RequestHeaders = this.Headers == null ? (this.Cookies == null ? new Headers() : new Headers(this.Cookies)) : this.Headers;
 			if (RequestHeaders != null)
 			{
 				foreach (string Key in RequestHeaders.AllKeys)
@@ -139,7 +169,7 @@ namespace HcHttp
 			//发送请求
 			Callbacks.OnStatus(Callbacks.Status.SendStart, Request.ContentLength);//开始发送
 			#region 发送请求
-			if (Rqt.Method == Method.POST)
+			if (this.Method == Method.POST)
 			{
 				//提交请求
 				using (var RequestStream = Request.GetRequestStream())
@@ -219,43 +249,44 @@ namespace HcHttp
 
 			//分析响应
 			ResponseManager = new Response(Response, Stream);
-			if (Rqt.Cookies == null)
+			if (this.Cookies == null)
 			{
-				Rqt.Cookies = new Cookies();
+				this.Cookies = new Cookies();
 			}
-			Rqt.Cookies.Add(Response.GetResponseHeader("Set-Cookie"), Cookies.CookieType.ResponseHeader);
+			this.Cookies.Add(Response.GetResponseHeader("Set-Cookie"), Cookies.CookieType.ResponseHeader);
 			Response.Close();
 			return ResponseManager;
 		}
+	}
 
-		private static bool SetAllowUnsafeHeaderParsing(bool useUnsafe)
+	public class APIRequest : Request
+	{
+		protected RequestBody.FormData SerializeParamters()
 		{
-			//Get the assembly that contains the internal class
-			System.Reflection.Assembly aNetAssembly = System.Reflection.Assembly.GetAssembly(typeof(System.Net.Configuration.SettingsSection));
-			if (aNetAssembly != null)
+			var body = new RequestBody.FormData();
+			var props = this.GetType().GetProperties();
+			foreach(var p in props)
 			{
-				//Use the assembly in order to get the internal type for the internal class
-				Type aSettingsType = aNetAssembly.GetType("System.Net.Configuration.SettingsSectionInternal");
-				if (aSettingsType != null)
+				if(p.DeclaringType == typeof(HcHttp.Request))
 				{
-					//Use the internal static property to get an instance of the internal settings class.
-					//If the static instance isn't created allready the property will create it for us.
-					object anInstance = aSettingsType.InvokeMember("Section",
-					  System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.GetProperty | System.Reflection.BindingFlags.NonPublic, null, null, new object[] { });
-
-					if (anInstance != null)
-					{
-						//Locate the private bool field that tells the framework is unsafe header parsing should be allowed or not
-						System.Reflection.FieldInfo aUseUnsafeHeaderParsing = aSettingsType.GetField("useUnsafeHeaderParsing", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-						if (aUseUnsafeHeaderParsing != null)
-						{
-							aUseUnsafeHeaderParsing.SetValue(anInstance, useUnsafe);
-							return true;
-						}
-					}
+					continue;
 				}
+				if (!p.Name.StartsWith("_"))
+				{
+					continue;
+				}
+				var k = p.Name.TrimStart('_');
+				var v = p.GetValue(this, null);
+				body[k] = v;
 			}
-			return false;
+			return body;
 		}
+
+		public override Response Send()
+		{
+			base.Content = this.SerializeParamters();
+			return base.Send();
+		}
+
 	}
 }

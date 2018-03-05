@@ -84,7 +84,7 @@ namespace HcHttp
 					Cookies = m_Cookies,
 					CacheLevel = m_CacheLevel
 				};
-				return Kernel.Request(Rqt);
+				return Rqt.Send();
 			}
 			catch (Exception ex)
 			{

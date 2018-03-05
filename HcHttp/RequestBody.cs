@@ -14,6 +14,17 @@ namespace HcHttp.RequestBody
 			this.Raw = new byte[0];
 		}
 
+		public Binary(string Content) : this()
+		{
+			this.ContentType = "text/plain";
+			this.Content = Content;
+		}
+
+		public Binary(byte[] Raw) : this()
+		{
+			this.Raw = Raw;
+		}
+
 		public byte[] Raw { get; set; }
 
 		public string ContentType { get; set; }
@@ -35,7 +46,7 @@ namespace HcHttp.RequestBody
 
 			set
 			{
-				Raw = Encoding.UTF8.GetBytes(value);
+				this.Raw = Encoding.UTF8.GetBytes(value);
 			}
 		}
 
@@ -183,24 +194,20 @@ namespace HcHttp.RequestBody
 		{
 			public string FileName { get; set; }
 
-			private Stream _Stream;
+			public Stream Stream { get; private set; }
 
-			private string _FilePath;
-
-			public Stream Stream { get { return _Stream; } }
-
-			public string FilePath { get { return _FilePath; } }
+			public string FilePath { get; private set; }
 
 			public File(Stream Stream)
 			{
-				this._Stream = Stream;
+				this.Stream = Stream;
 			}
 
 			public File(string FilePath)
 			{
-				this._FilePath = FilePath;
+				this.FilePath = FilePath;
 				this.FileName = new FileInfo(FilePath).Name;
-				this._Stream = System.IO.File.OpenRead(FilePath);
+				this.Stream = System.IO.File.OpenRead(FilePath);
 			}
 		}
 
