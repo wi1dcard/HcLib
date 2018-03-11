@@ -64,7 +64,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Callback.cs" />
+    <Compile Include="Events.cs" />
     <Compile Include="Cookies.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="HttpClient.cs" />

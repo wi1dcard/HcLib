@@ -22,6 +22,7 @@ namespace HcHttp
 			this.AutoRedirect = true;
 			this.Timeout = int.MaxValue;
 			this.CacheLevel = RequestCacheLevel.NoCacheNoStore;
+			this.TransmitChunkBytes = 4096;
 			this.SetAllowUnsafeHeaderParsing(true);
 		}
 
@@ -37,13 +38,13 @@ namespace HcHttp
 
 		public RequestBody.IBody Content { get; set; }
 
-		public Callbacks Callbacks { get; set; }
-
 		public bool AutoRedirect { get; set; }
 
 		public int Timeout { get; set; }
 
 		public RequestCacheLevel CacheLevel { get; set; }
+
+		public int TransmitChunkBytes { get; set; }
 
 		private bool SetAllowUnsafeHeaderParsing(bool useUnsafe)
 		{
@@ -75,6 +76,12 @@ namespace HcHttp
 			return false;
 		}
 
+		public event EventHandler<TransmitEventArgs> OnSending;
+
+		public event EventHandler<TransmitEventArgs> OnRecving;
+
+		public event EventHandler<StatusEventArgs> OnStatus;
+
 		public virtual Response Send()
 		{
 			//基本设置
@@ -88,7 +95,6 @@ namespace HcHttp
 				Uri += "?" + this.Content.ToString();
 			}
 			HttpWebRequest Request = (HttpWebRequest)HttpWebRequest.Create(Uri);
-			var Callbacks = this.Callbacks ?? new Callbacks();
 
 			byte[] RequestBody = { };
 			switch (this.Method)
@@ -167,14 +173,15 @@ namespace HcHttp
 			}
 
 			//发送请求
-			Callbacks.OnStatus(Callbacks.Status.SendStart, Request.ContentLength);//开始发送
+			this.OnStatus(this, new StatusEventArgs(StatusEventArgs.Status.SendStart, Request.ContentLength));//开始发送
 			#region 发送请求
 			if (this.Method == Method.POST)
 			{
 				//提交请求
 				using (var RequestStream = Request.GetRequestStream())
 				{
-					if (Callbacks.OnSending == null)
+					var Handler = this.OnSending.GetInvocationList();
+					if (Handler == null || Handler.Length == 0)
 					{
 						RequestStream.Write(RequestBody, 0, RequestBody.Length);
 					}
@@ -182,7 +189,7 @@ namespace HcHttp
 					{
 						int totalBytes = RequestBody.Length;
 						int totalUploadedBytes = 0;
-						int uploadedBytes = 4096;
+						int uploadedBytes = TransmitChunkBytes;
 						for (int offset = 0; offset < totalBytes; offset = totalUploadedBytes)
 						{
 							totalUploadedBytes += uploadedBytes;
@@ -192,7 +199,7 @@ namespace HcHttp
 								totalUploadedBytes = totalBytes;
 							}
 							RequestStream.Write(RequestBody, offset, uploadedBytes);
-							Callbacks.OnSending(uploadedBytes, totalUploadedBytes, totalBytes);
+							this.OnSending(this, new TransmitEventArgs(uploadedBytes, totalUploadedBytes, totalBytes));
 						}
 					}
 				}
@@ -201,7 +208,6 @@ namespace HcHttp
 			HttpWebResponse Response = null;
 			try
 			{
-				//接收响应
 				Response = (HttpWebResponse)Request.GetResponse();
 			}
 			catch (WebException e)
@@ -213,15 +219,16 @@ namespace HcHttp
 				}
 			}
 			#endregion
-			Callbacks.OnStatus(Callbacks.Status.SendFinish, Request.ContentLength);//发送完毕
+			this.OnStatus(this, new StatusEventArgs(StatusEventArgs.Status.SendFinish, Request.ContentLength));//发送完毕
 
-			Callbacks.OnStatus(Callbacks.Status.RecvStart, Response.ContentLength);//开始接收
+			this.OnStatus(this, new StatusEventArgs(StatusEventArgs.Status.RecvStart, Response.ContentLength));//开始接收
 			#region 接收响应
 			Response ResponseManager = null;
 			MemoryStream Stream = new MemoryStream();
 			using (Stream ResponseStream = Response.GetResponseStream())
 			{
-				if (Callbacks.OnRecving == null)
+				var Handler = this.OnRecving.GetInvocationList();
+				if (Handler == null || Handler.Length == 0)
 				{
 					ResponseStream.CopyTo(Stream);
 				}
@@ -230,7 +237,7 @@ namespace HcHttp
 					long totalBytes = Response.ContentLength;
 					long totalDownloadedBytes = 0;
 					int downloadedBytes = 0;
-					byte[] buff = new byte[4096];
+					byte[] buff = new byte[TransmitChunkBytes];
 					do
 					{
 						downloadedBytes = ResponseStream.Read(buff, 0, (int)buff.Length);
@@ -240,12 +247,12 @@ namespace HcHttp
 						}
 						totalDownloadedBytes += downloadedBytes;
 						Stream.Write(buff, 0, downloadedBytes);
-						Callbacks.OnRecving(downloadedBytes, totalDownloadedBytes, totalBytes);
+						this.OnRecving(this, new TransmitEventArgs(downloadedBytes, totalDownloadedBytes, totalBytes));
 					} while (true);
 				}
 			}
 			#endregion
-			Callbacks.OnStatus(Callbacks.Status.RecvFinish, Stream.Length);//接收完毕
+			this.OnStatus(this, new StatusEventArgs(StatusEventArgs.Status.RecvFinish, Stream.Length));//接收完毕
 
 			//分析响应
 			ResponseManager = new Response(Response, Stream);

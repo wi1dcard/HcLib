@@ -60,8 +60,7 @@ namespace HcHttp
 								RequestBody.IBody Content = null,
 								Headers Headers = null,
 								bool AutoRedirect = true,
-								int Timeout = 30 * 1000,
-								Callbacks Callbacks = null
+								int Timeout = 30 * 1000
 								)
 		{
 			try
@@ -78,7 +77,6 @@ namespace HcHttp
 					Uri = Uri,
 					Headers = Headers,
 					Content = Content,
-					Callbacks = Callbacks,
 					AutoRedirect = AutoRedirect,
 					Timeout = Timeout,
 					Cookies = m_Cookies,
