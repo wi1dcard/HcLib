@@ -45,7 +45,7 @@ namespace HcHttp
 			}
 		}
 
-		public string this[string Cookie]
+		public new string this[string Cookie]
 		{
 			get
 			{
