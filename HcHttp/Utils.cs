@@ -6,8 +6,16 @@ using MSScriptControl;
 
 namespace HcHttp
 {
+	/// <summary>
+	/// 辅助函数类
+	/// </summary>
     public static class Utils
     {
+		/// <summary>
+		/// 利用ScriptControl执行JS脚本
+		/// </summary>
+		/// <param name="Script"></param>
+		/// <returns></returns>
 		public static ScriptControl Script(string Script)
 		{
 			ScriptControl sc = new ScriptControl();
@@ -17,6 +25,13 @@ namespace HcHttp
 			return sc;
 		}
 
+		/// <summary>
+		/// 取一段字符串内两段子字串中间的字符串
+		/// </summary>
+		/// <param name="Source"></param>
+		/// <param name="Begin"></param>
+		/// <param name="End"></param>
+		/// <returns></returns>
 		public static string Between(this string Source, string Begin, string End)
         {
             int iBegin = Source.IndexOf(Begin);
@@ -32,6 +47,11 @@ namespace HcHttp
             return Source.Substring(iBegin + Begin.Length, iEnd - iBegin - Begin.Length);
         }
 
+		/// <summary>
+		/// 对象自拷贝
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
         public static object SelfCopy(this object obj)
         {
             Object targetDeepCopyObj;
