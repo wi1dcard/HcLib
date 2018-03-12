@@ -5,15 +5,33 @@ using System.Net.Cache;
 
 namespace HcHttp
 {
+	/// <summary>
+	/// HTTP请求方法
+	/// </summary>
 	public enum Method
 	{
+		/// <summary>
+		/// GET请求
+		/// </summary>
 		GET,
+		/// <summary>
+		/// POST请求
+		/// </summary>
 		POST,
+		/// <summary>
+		/// HEAD请求
+		/// </summary>
 		HEAD
 	}
 
+	/// <summary>
+	/// 核心请求类
+	/// </summary>
 	public class Request
 	{
+		/// <summary>
+		/// 构造函数
+		/// </summary>
 		public Request()
 		{
 			this.Method = Method.GET;
@@ -26,24 +44,54 @@ namespace HcHttp
 			this.SetAllowUnsafeHeaderParsing(true);
 		}
 
+		/// <summary>
+		/// HTTP请求方法
+		/// </summary>
 		public Method Method { get; set; }
 
+		/// <summary>
+		/// 当此值被设定时，请求完整Url为：BaseUri + Uri
+		/// </summary>
 		public string BaseUri { get; set; }
 
+		/// <summary>
+		/// 当BaseUri被设定时，请求完整Url为：m_BaseUri + Uri
+		/// </summary>
 		public string Uri { get; set; }
 
+		/// <summary>
+		/// 请求头
+		/// </summary>
 		public Headers Headers { get; set; }
 
+		/// <summary>
+		/// 请求、响应Cookies管理
+		/// </summary>
 		public Cookies Cookies { get; set; }
 
+		/// <summary>
+		/// 请求体
+		/// </summary>
 		public RequestBody.IBody Content { get; set; }
 
+		/// <summary>
+		/// 是否自动跟随3xx重定向
+		/// </summary>
 		public bool AutoRedirect { get; set; }
 
+		/// <summary>
+		/// 超时时间（单位：毫秒）
+		/// </summary>
 		public int Timeout { get; set; }
 
+		/// <summary>
+		/// 缓存级别
+		/// </summary>
 		public RequestCacheLevel CacheLevel { get; set; }
 
+		/// <summary>
+		/// 传输（发送请求体/接收响应头）分片字节数，此值仅在绑定事件后有效
+		/// </summary>
 		public int TransmitChunkBytes { get; set; }
 
 		private bool SetAllowUnsafeHeaderParsing(bool useUnsafe)
@@ -76,12 +124,25 @@ namespace HcHttp
 			return false;
 		}
 
+		/// <summary>
+		/// 请求体发送中事件
+		/// </summary>
 		public event EventHandler<TransmitEventArgs> OnSending;
 
+		/// <summary>
+		/// 响应体接收中事件
+		/// </summary>
 		public event EventHandler<TransmitEventArgs> OnRecving;
 
+		/// <summary>
+		/// 传输开始结束事件
+		/// </summary>
 		public event EventHandler<StatusEventArgs> OnStatus;
 
+		/// <summary>
+		/// 发送请求
+		/// </summary>
+		/// <returns></returns>
 		public virtual Response Send()
 		{
 			//基本设置
@@ -266,8 +327,15 @@ namespace HcHttp
 		}
 	}
 
+	/// <summary>
+	/// API请求基类
+	/// </summary>
 	public class APIRequest : Request
 	{
+		/// <summary>
+		/// 序列化本类及子类的成员，添加进请求体参数
+		/// </summary>
+		/// <returns></returns>
 		protected RequestBody.FormData SerializeParamters()
 		{
 			var body = new RequestBody.FormData();
@@ -289,6 +357,10 @@ namespace HcHttp
 			return body;
 		}
 
+		/// <summary>
+		/// 将本类及子类成员作为请求体参数，发送请求
+		/// </summary>
+		/// <returns></returns>
 		public override Response Send()
 		{
 			base.Content = this.SerializeParamters();

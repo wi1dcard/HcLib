@@ -6,6 +6,9 @@ using System.Text;
 
 namespace HcHttp.RequestBody
 {
+	/// <summary>
+	/// 二进制请求体
+	/// </summary>
 	public class Binary : IBody
 	{
 		public Binary()
@@ -57,6 +60,9 @@ namespace HcHttp.RequestBody
 
 	}
 
+	/// <summary>
+	/// Url Encoded 请求体
+	/// </summary>
 	public class FormUrlEncoded : Dictionary<string, string>, IBody
 	{
 		public FormUrlEncoded() { }
@@ -126,6 +132,9 @@ namespace HcHttp.RequestBody
 
 	}
 
+	/// <summary>
+	/// Form Data 请求体
+	/// </summary>
 	public class FormData : Dictionary<string, object>, IBody
 	{
 		private string Boundary;
@@ -213,10 +222,22 @@ namespace HcHttp.RequestBody
 
 	}
 
+	/// <summary>
+	/// 请求体抽象接口
+	/// </summary>
 	public interface IBody
 	{
+		/// <summary>
+		/// 请求体原始二进制数据
+		/// </summary>
 		byte[] Raw { get; }
+		/// <summary>
+		/// 此请求体对应ContentType值
+		/// </summary>
 		string ContentType { get; }
+		/// <summary>
+		/// 此请求体ContentLength值
+		/// </summary>
 		int ContentLength { get; }
 	}
 }

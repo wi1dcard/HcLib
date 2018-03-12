@@ -8,22 +8,44 @@ namespace HcHttp
 	/// </summary>
 	public class Cookies : CookieCollection
 	{
+		/// <summary>
+		/// Cookie类型
+		/// </summary>
 		public enum CookieType
 		{
+			/// <summary>
+			/// 来自请求头的Cookies字符串
+			/// </summary>
 			RequestHeader,
+			/// <summary>
+			/// 来自响应头的Cookies字符串
+			/// </summary>
 			ResponseHeader,
 		}
 
+		/// <summary>
+		/// 空构造函数
+		/// </summary>
 		public Cookies()
 		{
 
 		}
 
+		/// <summary>
+		/// 根据Cookie(s)字符串初始化
+		/// </summary>
+		/// <param name="Cookies"></param>
+		/// <param name="Type"></param>
 		public Cookies(string Cookies, CookieType Type = CookieType.RequestHeader)
 		{
 			this.Add(Cookies, Type);
 		}
-
+		
+		/// <summary>
+		/// 添加Cookie(s)
+		/// </summary>
+		/// <param name="Cookies"></param>
+		/// <param name="Type"></param>
 		public void Add(string Cookies, CookieType Type = CookieType.RequestHeader)
 		{
 			Regex regex = null;
@@ -45,6 +67,11 @@ namespace HcHttp
 			}
 		}
 
+		/// <summary>
+		/// 获取、设置指定Cookie
+		/// </summary>
+		/// <param name="Cookie"></param>
+		/// <returns></returns>
 		public new string this[string Cookie]
 		{
 			get
@@ -57,6 +84,10 @@ namespace HcHttp
 			}
 		}
 
+		/// <summary>
+		/// 将本对象转换成Cookie(s)字符串
+		/// </summary>
+		/// <returns></returns>
 		public override string ToString()
 		{
 			StringBuilder res = new StringBuilder(this.Count * 128);

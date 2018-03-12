@@ -13,11 +13,18 @@ namespace HcHttp
 	/// </summary>
 	public class Headers : WebHeaderCollection
 	{
+		/// <summary>
+		/// 空构造函数
+		/// </summary>
 		public Headers() : base()
 		{
 
 		}
 
+		/// <summary>
+		/// 根据Cookie对象初始化
+		/// </summary>
+		/// <param name="Cookies"></param>
 		public Headers(Cookies Cookies) : this()
 		{
 			if(Cookies != null)
@@ -30,6 +37,10 @@ namespace HcHttp
 			}
 		}
 
+		/// <summary>
+		/// 根据头信息字符串初始化
+		/// </summary>
+		/// <param name="Headers"></param>
 		public Headers(string Headers)
 			: this()
 		{

@@ -9,6 +9,9 @@ using System.Text.RegularExpressions;
 
 namespace HcHttp
 {
+	/// <summary>
+	/// 兼容原2.0版本的Http类
+	/// </summary>
 	public class HttpClient
 	{
 		/// <summary>
@@ -36,6 +39,9 @@ namespace HcHttp
 		/// </summary>
 		public Func<Exception, Response> m_ErrorHandler { get; set; }
 
+		/// <summary>
+		/// 构造函数
+		/// </summary>
 		public HttpClient()
 		{
 			m_BaseUri = "";
