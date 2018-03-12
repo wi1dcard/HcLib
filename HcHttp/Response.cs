@@ -10,7 +10,10 @@ namespace HcHttp
 	/// </summary>
 	public class Response : Object
 	{
-		public byte[] Data
+		/// <summary>
+		/// 响应体原始数据
+		/// </summary>
+		public byte[] Raw
 		{
 			get;
 			private set;
@@ -72,7 +75,7 @@ namespace HcHttp
 			this.StatusDescription = Response.StatusDescription;
 			this.Method = Response.Method;
 			this.ResponseUri = Response.ResponseUri;
-			this.Data = Stream.ToArray();
+			this.Raw = Stream.ToArray();
 			this.Charset = Response.CharacterSet;
 		}
 
@@ -85,7 +88,7 @@ namespace HcHttp
 			}
 			catch
 			{
-				var meta = Regex.Match(Encoding.Default.GetString(this.Data), "<meta[^<]*charset=\"?(.*?)\"", RegexOptions.IgnoreCase);
+				var meta = Regex.Match(Encoding.Default.GetString(this.Raw), "<meta[^<]*charset=\"?(.*?)\"", RegexOptions.IgnoreCase);
 				if (meta != null && meta.Groups.Count > 0)
 				{
 					string charset = meta.Groups[1].Value.Trim();
@@ -98,7 +101,7 @@ namespace HcHttp
 					}
 				}
 			}
-			return encoding.GetString(this.Data);
+			return encoding.GetString(this.Raw);
 		}
 
 		public override string ToString()
