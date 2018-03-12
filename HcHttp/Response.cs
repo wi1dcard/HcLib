@@ -10,13 +10,10 @@ namespace HcHttp
 	/// </summary>
 	public class Response : Object
 	{
-		private byte[] m_Data;
 		public byte[] Data
 		{
-			get
-			{
-				return m_Data;
-			}
+			get;
+			private set;
 		}
 
 		private string m_Text;
@@ -32,69 +29,51 @@ namespace HcHttp
 			}
 		}
 
-		private WebHeaderCollection m_Header;
 		public WebHeaderCollection Header
 		{
-			get
-			{
-				return m_Header;
-			}
+			get;
+			private set;
 		}
 
-		private HttpStatusCode m_StatusCode;
 		public HttpStatusCode StatusCode
 		{
-			get
-			{
-				return m_StatusCode;
-			}
+			get;
+			private set;
 		}
 
-		private string m_StatusDescription;
 		public string StatusDescription
 		{
-			get
-			{
-				return m_StatusDescription;
-			}
+			get;
+			private set;
 		}
 
-		private string m_Method;
 		public string Method
 		{
-			get
-			{
-				return m_Method;
-			}
+			get;
+			private set;
 		}
 
-		private Uri m_ResponseUri;
 		public Uri ResponseUri
 		{
-			get
-			{
-				return m_ResponseUri;
-			}
+			get;
+			private set;
 		}
 
-		private string m_Charset;
 		public string Charset
 		{
-			get
-			{
-				return m_Charset;
-			}
+			get;
+			private set;
 		}
 
 		public Response(HttpWebResponse Response, MemoryStream Stream)
 		{
-			this.m_Header = Response.Headers;
-			this.m_StatusCode = Response.StatusCode;
-			this.m_StatusDescription = Response.StatusDescription;
-			this.m_Method = Response.Method;
-			this.m_ResponseUri = Response.ResponseUri;
-			this.m_Data = Stream.ToArray();
-			this.m_Charset = Response.CharacterSet;
+			this.Header = Response.Headers;
+			this.StatusCode = Response.StatusCode;
+			this.StatusDescription = Response.StatusDescription;
+			this.Method = Response.Method;
+			this.ResponseUri = Response.ResponseUri;
+			this.Data = Stream.ToArray();
+			this.Charset = Response.CharacterSet;
 		}
 
 		private string GetText()
@@ -102,11 +81,11 @@ namespace HcHttp
 			Encoding encoding = Encoding.UTF8;
 			try
 			{
-				encoding = Encoding.GetEncoding(this.m_Charset);
+				encoding = Encoding.GetEncoding(this.Charset);
 			}
 			catch
 			{
-				var meta = Regex.Match(Encoding.Default.GetString(this.m_Data), "<meta[^<]*charset=\"?(.*?)\"", RegexOptions.IgnoreCase);
+				var meta = Regex.Match(Encoding.Default.GetString(this.Data), "<meta[^<]*charset=\"?(.*?)\"", RegexOptions.IgnoreCase);
 				if (meta != null && meta.Groups.Count > 0)
 				{
 					string charset = meta.Groups[1].Value.Trim();
@@ -119,7 +98,7 @@ namespace HcHttp
 					}
 				}
 			}
-			return encoding.GetString(this.m_Data);
+			return encoding.GetString(this.Data);
 		}
 
 		public override string ToString()
