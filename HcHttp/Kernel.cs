@@ -234,7 +234,7 @@ namespace HcHttp
 			}
 
 			//发送请求
-			this.OnStatus(this, new StatusEventArgs(StatusEventArgs.Status.SendStart, Request.ContentLength));//开始发送
+			this.OnStatus?.Invoke(this, new StatusEventArgs(StatusEventArgs.Status.SendStart, Request.ContentLength));//开始发送
 			#region 发送请求
 			if (this.Method == Method.POST)
 			{
@@ -280,9 +280,9 @@ namespace HcHttp
 				}
 			}
 			#endregion
-			this.OnStatus(this, new StatusEventArgs(StatusEventArgs.Status.SendFinish, Request.ContentLength));//发送完毕
+			this.OnStatus?.Invoke(this, new StatusEventArgs(StatusEventArgs.Status.SendFinish, Request.ContentLength));//发送完毕
 
-			this.OnStatus(this, new StatusEventArgs(StatusEventArgs.Status.RecvStart, Response.ContentLength));//开始接收
+			this.OnStatus?.Invoke(this, new StatusEventArgs(StatusEventArgs.Status.RecvStart, Response.ContentLength));//开始接收
 			#region 接收响应
 			Response ResponseManager = null;
 			MemoryStream Stream = new MemoryStream();
@@ -313,7 +313,7 @@ namespace HcHttp
 				}
 			}
 			#endregion
-			this.OnStatus(this, new StatusEventArgs(StatusEventArgs.Status.RecvFinish, Stream.Length));//接收完毕
+			this.OnStatus?.Invoke(this, new StatusEventArgs(StatusEventArgs.Status.RecvFinish, Stream.Length));//接收完毕
 
 			//分析响应
 			ResponseManager = new Response(Response, Stream);
