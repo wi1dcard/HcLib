@@ -37,6 +37,7 @@ namespace HcHttp
 			this.Method = Method.GET;
 			this.BaseUri = "";
 			this.Uri = "";
+			this.Headers = new Headers();
 			this.AutoRedirect = true;
 			this.Timeout = int.MaxValue;
 			this.CacheLevel = RequestCacheLevel.NoCacheNoStore;
@@ -241,7 +242,7 @@ namespace HcHttp
 				//提交请求
 				using (var RequestStream = Request.GetRequestStream())
 				{
-					var Handler = this.OnSending.GetInvocationList();
+					var Handler = this.OnSending?.GetInvocationList();
 					if (Handler == null || Handler.Length == 0)
 					{
 						RequestStream.Write(RequestBody, 0, RequestBody.Length);
@@ -260,7 +261,7 @@ namespace HcHttp
 								totalUploadedBytes = totalBytes;
 							}
 							RequestStream.Write(RequestBody, offset, uploadedBytes);
-							this.OnSending(this, new TransmitEventArgs(uploadedBytes, totalUploadedBytes, totalBytes));
+							this.OnSending?.Invoke(this, new TransmitEventArgs(uploadedBytes, totalUploadedBytes, totalBytes));
 						}
 					}
 				}
@@ -288,7 +289,7 @@ namespace HcHttp
 			MemoryStream Stream = new MemoryStream();
 			using (Stream ResponseStream = Response.GetResponseStream())
 			{
-				var Handler = this.OnRecving.GetInvocationList();
+				var Handler = this.OnRecving?.GetInvocationList();
 				if (Handler == null || Handler.Length == 0)
 				{
 					ResponseStream.CopyTo(Stream);
@@ -308,7 +309,7 @@ namespace HcHttp
 						}
 						totalDownloadedBytes += downloadedBytes;
 						Stream.Write(buff, 0, downloadedBytes);
-						this.OnRecving(this, new TransmitEventArgs(downloadedBytes, totalDownloadedBytes, totalBytes));
+						this.OnRecving?.Invoke(this, new TransmitEventArgs(downloadedBytes, totalDownloadedBytes, totalBytes));
 					} while (true);
 				}
 			}
