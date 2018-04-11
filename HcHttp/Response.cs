@@ -112,26 +112,37 @@ namespace HcHttp
 		private string GetText()
 		{
 			Encoding encoding = Encoding.UTF8;
-			try
+			var charset = this.GetCharset();
+			if (!string.IsNullOrWhiteSpace(charset))
 			{
-				encoding = Encoding.GetEncoding(this.Charset);
-			}
-			catch
-			{
-				var meta = Regex.Match(Encoding.Default.GetString(this.Raw), "<meta[^<]*charset=\"?(.*?)\"", RegexOptions.IgnoreCase);
-				if (meta != null && meta.Groups.Count > 0)
+				try
 				{
-					string charset = meta.Groups[1].Value.Trim();
-					try
-					{
-						encoding = Encoding.GetEncoding(charset);
-					}
-					catch
-					{
-					}
+					encoding = Encoding.GetEncoding(charset);
 				}
+				catch
+				{
+
+				}	
 			}
 			return encoding.GetString(this.Raw);
+		}
+
+		/// <summary>
+		/// 获取Charset
+		/// </summary>
+		/// <returns></returns>
+		protected string GetCharset()
+		{
+			if (!string.IsNullOrWhiteSpace(this.Charset))
+			{
+				return this.Charset;
+			}
+			var metaCharset = Regex.Match(Encoding.Default.GetString(this.Raw), "<meta[^<]*charset=\"?(.*?)\"", RegexOptions.IgnoreCase);
+			if (metaCharset != null && metaCharset.Groups.Count > 0)
+			{
+				return  metaCharset.Groups[1].Value.Trim();
+			}
+			return "";
 		}
 
 		/// <summary>
