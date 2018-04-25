@@ -55,5 +55,14 @@ namespace HcHttp
 			}
 		}
 
+		public bool ContainsKey(string key)
+		{
+			if (this.Get(key) == null)
+			{
+				return this.AllKeys.Contains(key);
+			}
+			return true;
+		}
+
 	}
 }
