@@ -11,21 +11,31 @@ namespace TestExample
 	{
 		static void Main(string[] args)
 		{
-			//var http = new HcHttp.HttpClient();
-			//http.m_Cookies.Add("cid=PfQdaFqbnE2izWCtBtepAg==");
+			// HTTP Client 实例
+			var http = new HcHttp.HttpClient();
 
-			//var body = new HcHttp.RequestBody.FormData();
-			//body["smfile"] = new HcHttp.RequestBody.FormData.File(@"C:\Users\abcab\OneDrive\图片\生日.jpg");
-			//body["file_id"] = "0";
+			// 新增Cookie
+			http.m_Cookies.Add("cid=PfQdaFqbnE2izWCtBtepAg==");
 
-			//var res = http.Request(
-			//	"https://sm.ms/api/upload?inajax=1&ssl=1",
-			//	HcHttp.Method.POST,
-			//	body
-			//	);
+			// 请求体实例
+			var body = new HcHttp.RequestBody.FormData();
 
-			//Console.Write(res);
-			//Console.Read();
+			// 带文件参数
+			body["smfile"] = new HcHttp.RequestBody.FormData.File(@"C:\Users\abcab\OneDrive\图片\生日.jpg");
+
+			// 带其他参数
+			body["file_id"] = "0";
+
+			// 提交请求
+			var res = http.Request(
+				"https://sm.ms/api/upload?inajax=1&ssl=1",
+				HcHttp.Method.POST,
+				body
+				);
+
+			// 输出结果
+			Console.Write(res);
+			Console.Read();
 		}
 	}
 }
