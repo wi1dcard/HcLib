@@ -37,7 +37,7 @@ namespace HcHttp
 			this.Method = Method.GET;
 			this.BaseUri = "";
 			this.Uri = "";
-			this.Headers = new Headers();
+			//this.Headers = new Headers();
 			this.AutoRedirect = true;
 			this.Timeout = int.MaxValue;
 			this.CacheLevel = RequestCacheLevel.NoCacheNoStore;
@@ -194,44 +194,51 @@ namespace HcHttp
 			Request.CachePolicy = new RequestCachePolicy(this.CacheLevel);
 			Request.KeepAlive = true;
 			Request.Accept = "*/*";
-
-			//需要使用属性设置的特殊请求头
-			var RemoveHeaders = new string[] { "Referer", "User-Agent", "Accept", "Keep-Alive", "Connection", "Content-Length", "Content-Type", "Host", "If-Modified-Since" };
-			foreach (var HeaderName in RemoveHeaders)
+			
+			if(this.Headers == null)
 			{
-				if (this.Headers != null && !string.IsNullOrEmpty(this.Headers.Get(HeaderName)))
+				this.Headers = new Headers();
+			}
+			else
+			{
+				//需要使用属性设置的特殊请求头
+				var ShouldRemove = new string[] { "Referer", "User-Agent", "Accept", "Keep-Alive", "Connection", "Content-Length", "Content-Type", "Host", "If-Modified-Since" };
+				foreach (var HeaderName in ShouldRemove)
 				{
-					var HeaderNameWithoutHyphens = HeaderName.Replace("-", "");
-					var HeaderValue = this.Headers[HeaderName];
-					var TargetType = Request.GetType().GetProperty(HeaderNameWithoutHyphens).PropertyType;
-					object HeaderValueAsObject = null;
-					switch (TargetType.Name)
+					if (!string.IsNullOrEmpty(this.Headers.Get(HeaderName)))
 					{
-						case "Int64":
-							HeaderValueAsObject = Int64.Parse(HeaderValue);
-							break;
-						case "DateTime":
-							HeaderValueAsObject = DateTime.Parse(HeaderValue);
-							break;
-						case "String":
-						default:
-							HeaderValueAsObject = HeaderValue;
-							break;
+						var HeaderNameWithoutHyphens = HeaderName.Replace("-", "");
+						var HeaderValue = this.Headers[HeaderName];
+						var TargetType = Request.GetType().GetProperty(HeaderNameWithoutHyphens).PropertyType;
+						object HeaderValueAsObject = null;
+						switch (TargetType.Name)
+						{
+							case "Int64":
+								HeaderValueAsObject = Int64.Parse(HeaderValue);
+								break;
+							case "DateTime":
+								HeaderValueAsObject = DateTime.Parse(HeaderValue);
+								break;
+							case "String":
+							default:
+								HeaderValueAsObject = HeaderValue;
+								break;
 
+						}
+						Request.GetType().GetProperty(HeaderNameWithoutHyphens).SetValue(Request, HeaderValueAsObject, null);
+						this.Headers.Remove(HeaderName);
 					}
-					Request.GetType().GetProperty(HeaderNameWithoutHyphens).SetValue(Request, HeaderValueAsObject, null);
-					this.Headers.Remove(HeaderName);
 				}
 			}
 
-			//请求头
-			var RequestHeaders = this.Headers == null ? (this.Cookies == null ? new Headers() : new Headers(this.Cookies)) : this.Headers;
-			if (RequestHeaders != null)
+			if (!this.Headers.ContainsKey("Cookie"))
 			{
-				foreach (string Key in RequestHeaders.AllKeys)
-				{
-					Request.Headers.Set(Key, RequestHeaders[Key]);
-				}
+				this.Headers["Cookie"] = this.Cookies.ToString();
+			}
+			//设置请求头
+			foreach (string Key in this.Headers.AllKeys)
+			{
+				Request.Headers.Set(Key, this.Headers[Key]);
 			}
 
 			//发送请求
