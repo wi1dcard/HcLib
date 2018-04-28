@@ -37,7 +37,8 @@ namespace HcHttp
 			this.Method = Method.GET;
 			this.BaseUri = "";
 			this.Uri = "";
-			//this.Headers = new Headers();
+			this.Headers = new Headers();
+			this.Cookies = new Cookies();
 			this.AutoRedirect = true;
 			this.Timeout = int.MaxValue;
 			this.CacheLevel = RequestCacheLevel.NoCacheNoStore;
@@ -231,7 +232,7 @@ namespace HcHttp
 				}
 			}
 
-			if (!this.Headers.ContainsKey("Cookie"))
+			if (!this.Headers.ContainsKey("Cookie") && this.Cookies != null)
 			{
 				this.Headers["Cookie"] = this.Cookies.ToString();
 			}
